@@ -1,0 +1,68 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>刘启仁 - AI Agent / 前端软件工程师</title><style>@page{size:A4;margin:14mm}*{box-sizing:border-box}body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:#182230;line-height:1.5;margin:0;background:#eef2f6}main{max-width:900px;margin:20px auto;background:white;padding:36px 44px;box-shadow:0 4px 24px #0002}h1{margin:0;color:#102a43;font-size:30px;border-bottom:3px solid #0f6cbd;padding-bottom:10px}h2{font-size:18px;color:#0f6cbd;border-left:4px solid #0f6cbd;padding-left:9px;margin-top:22px}h3{font-size:15px;margin:14px 0 5px}h4{font-size:15px;color:#0b5cad;margin:18px 0 6px;border-bottom:1px solid #d8e1ea;padding-bottom:3px}h5{font-size:13.5px;color:#173f5f;margin:13px 0 4px}p,li{font-size:12.8px}p{margin:5px 0}ul{padding-left:20px;margin:4px 0 9px}li{margin:3px 0}strong{color:#0b5cad}@media print{body{background:white}main{margin:0;box-shadow:none;max-width:none;padding:0}h2,h3,h4,h5{page-break-after:avoid}li{page-break-inside:avoid}}</style></head><body><main><h1>刘启仁（Qiren Liu）</h1>
+<p><strong>AI Agent / 前端软件工程师</strong><br />
+电话：13382183295｜邮箱：lqr_ld@163.com</p>
+<h2>个人概述</h2>
+<p>4 年微软 Microsoft Advertising 软件工程经验，工作主线覆盖 <strong>AI Agent 与大型广告 UI</strong>。在公司内设计并实现分层图 RAG 代码知识库与多智能体 Commit 分析系统，具备检索、Agent 编排、MCP、评测与可观测性的端到端实践；同时在 Campaign UI 中长期负责性能、素材、监测、Deal、推荐与质量工程，并拥有广告后端项目的完整协作与交付经验。</p>
+<h2>核心技能</h2>
+<ul>
+<li><strong>AI / Agent：</strong> RAG、Hierarchical/Graph RAG、Embedding、混合/多查询检索、RRF、LLM-as-Judge、Agent 编排、MCP、Prompt/Context Engineering、SSE</li>
+<li><strong>前端：</strong> JavaScript、React、Fluent UI</li>
+<li><strong>后端：</strong> C#、Python、Cosmos</li>
+<li><strong>存储与工程化：</strong> sqlite-vec、Azure Blob/Table、Kubernetes、Kusto/KQL、Azure DevOps CI/CD</li>
+</ul>
+<h2>教育背景</h2>
+<ul>
+<li><strong>电子科技大学｜硕士，网络工程学院</strong>｜2019.09 – 2022.06</li>
+<li><strong>电子科技大学｜本科，信息与通信工程学院</strong>｜2015.09 – 2019.06</li>
+</ul>
+<h2>工作经历</h2>
+<h3>Microsoft｜软件工程师，Microsoft Advertising / Microsoft AI</h3>
+<p><strong>2022.08 – 2026.08</strong></p>
+<h4>AI Agent 核心项目：Commit AI Resolver｜多智能体 Commit 语义分析系统</h4>
+<p><strong>JavaScript / SQLite FTS5 / sqlite-vec / RRF / MCP</strong></p>
+<ul>
+<li>设计并实现有界多智能体流水线：<strong>Intent Extractor → RAG Retriever → Answer Synthesizer → Answer Evaluator</strong>；Evaluator 可返回检索改写策略，最多迭代 3 轮，并以结果停滞信号提前终止。</li>
+<li>以 JSON 为可审计源数据、SQLite metadata/FTS5 与 sqlite-vec 为可重建索引；在约 2,300 条、34 天窗口的内部样本上融合关键词与稠密召回，并以加权 RRF 排序。</li>
+<li>将 embedding 模型/维度/query instruction 与索引版本配置化，支持 OpenAI-compatible 本地端点和公开 JSONL 离线数据；保留检索证据护栏及 18 个手工 badcase，自动化 Eval Harness 仍在规划。</li>
+<li>通过 Streamable HTTP 暴露 6 个 MCP 工具，覆盖语义检索、精确 Commit、日期/工单摘要、Diff 与条件查询，使 IDE Agent 可直接复用检索能力。</li>
+</ul>
+<h4>AI Agent 核心项目：adocag-server｜HiRAG 代码知识库与 Wiki 生成服务</h4>
+<p><strong>Python / FastAPI / tree-sitter / Leiden / Graph RAG / SSE</strong></p>
+<ul>
+<li>基于分层图 RAG 构建代码知识服务：通过 tree-sitter 做 AST 语义分块，抽取实体/关系，使用 Leiden 完成社区聚类与摘要，支持从函数级到架构级的多粒度问题。</li>
+<li>提供 hi_local、hi_global、hi_bridge 等分层检索模式，通过 FastAPI/SSE 输出 Wiki 与研究结果，并支持多 LLM 后端、Blob/Table 存储及索引刷新。</li>
+<li>将 deep_research 设计为最多 5 轮的有界关键词扩展 pipeline；围绕 Recall@K/MRR golden set、LLM 缓存及 token/latency 观测设计后续评测与优化方案。</li>
+</ul>
+<h4>广告 UI 项目</h4>
+<p><strong>TypeScript / React / Fluent UI / OData / pnpm Monorepo / Selenium / Kusto</strong><br />
+在大型广告投放管理平台中累计完成 490+ 次生产合并，负责素材、监测、Deal、推荐、性能与质量工程等模块，并与 MT 后端和数据团队协作完成端到端交付。</p>
+<h5>UI 性能优化</h5>
+<ul>
+<li>作为性能专项核心贡献者，系统优化 Native 广告组创建/编辑及 Native 广告创建等高延迟向导，将核心页面生产 P95 降低 <strong>40%–72%</strong>。</li>
+<li>通过生产性能 marker 和 React Profiler 区分 UI 渲染、网络及 MT/MDS 后端耗时，并采用隐藏面板懒渲染、React 重渲染治理、请求缓存预热/拆分及非必要初始 API 裁剪缩短关键路径。</li>
+<li>最终将广告组编辑页 P95 从 <strong>10s 降至 2.8s（-72%）</strong>、创建页从 <strong>8s 降至 2.7s（-66%）</strong>、Native 广告创建页从 <strong>6s 降至 3.6s（-40%）</strong>，并持续通过生产遥测验证效果。</li>
+</ul>
+<h5>图片广告素材质量预测与图片优化</h5>
+<ul>
+<li>集成 AIGC 团队提供的图片生成/重塑 API，完成素材质量建议、候选图片增量展示、交互状态、遥测及可访问性闭环。</li>
+</ul>
+<h5>广告第三方监测（IAS / DoubleVerify / ISPOT / MOAT）</h5>
+<ul>
+<li>主导多家第三方监测厂商在展示、视频和原生广告中的接入，覆盖追踪设置、业务校验、批量编辑及前后端错误契约。</li>
+</ul>
+<h5>Media Deal / Netflix 版权广告与 Xandr 视频广告</h5>
+<ul>
+<li>交付 Media Deal 广告创建/编辑、竞价与地域校验，并在 GA 后跨仓库安全下线创建入口、保留编辑链路。</li>
+</ul>
+<h5>广告推荐（Recommendations）</h5>
+<ul>
+<li>交付受众、视频及原生广告推荐，将动态配置、推荐卡片、素材应用、本地化与测试整合进广告创建和编辑流程。</li>
+</ul>
+<h5>可访问性、国际化与质量工程 / DRI</h5>
+<ul>
+<li>持续负责 A11y、i18n、测试框架迁移、CI/CD 稳定性与线上 DRI，保障复杂广告 UI 的全球化交付质量。</li>
+</ul>
+<h4>广告后端项目</h4>
+<ul>
+<li>负责图片资产生命周期治理、Xandr Deal 自动同步、每日批量推荐视频生成及广告曝光/第三方测量服务，覆盖 C#/.NET、WCF/SOAP/Bulk API、Task Engine、SQL Server、Azure Queue 与 Kubernetes。</li>
+</ul></main></body></html>

@@ -1,0 +1,59 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>刘启仁 - AI Agent / 后端软件工程师</title><style>@page{size:A4;margin:14mm}*{box-sizing:border-box}body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:#182230;line-height:1.5;margin:0;background:#eef2f6}main{max-width:900px;margin:20px auto;background:white;padding:36px 44px;box-shadow:0 4px 24px #0002}h1{margin:0;color:#102a43;font-size:30px;border-bottom:3px solid #0f6cbd;padding-bottom:10px}h2{font-size:18px;color:#0f6cbd;border-left:4px solid #0f6cbd;padding-left:9px;margin-top:22px}h3{font-size:15px;margin:14px 0 5px}h4{font-size:15px;color:#0b5cad;margin:18px 0 6px;border-bottom:1px solid #d8e1ea;padding-bottom:3px}h5{font-size:13.5px;color:#173f5f;margin:13px 0 4px}p,li{font-size:12.8px}p{margin:5px 0}ul{padding-left:20px;margin:4px 0 9px}li{margin:3px 0}strong{color:#0b5cad}@media print{body{background:white}main{margin:0;box-shadow:none;max-width:none;padding:0}h2,h3,h4,h5{page-break-after:avoid}li{page-break-inside:avoid}}</style></head><body><main><h1>刘启仁（Qiren Liu）</h1>
+<p><strong>AI Agent / 后端软件工程师</strong><br />
+电话：13382183295｜邮箱：lqr_ld@163.com</p>
+<h2>个人概述</h2>
+<p>4 年微软 Microsoft Advertising 软件工程经验，工作主线覆盖 <strong>AI Agent 与广告后端系统</strong>。在公司内设计并实现分层图 RAG 代码知识库与多智能体 Commit 分析系统，具备检索、Agent 编排、MCP、评测与可观测性的端到端实践；同时负责图片资产治理、Deal 同步、异步推荐视频及第三方测量等后端链路，并具备大型 Campaign UI 的端到端交付经验。</p>
+<h2>核心技能</h2>
+<ul>
+<li><strong>AI / Agent：</strong> RAG、Hierarchical/Graph RAG、Embedding、混合/多查询检索、RRF、LLM-as-Judge、Agent 编排、MCP、Prompt/Context Engineering、SSE</li>
+<li><strong>后端：</strong> C#、Python、Cosmos</li>
+<li><strong>前端：</strong> JavaScript、React、Fluent UI</li>
+<li><strong>存储与工程化：</strong> sqlite-vec、Azure Blob/Table、Kubernetes、Kusto/KQL、Azure DevOps CI/CD</li>
+</ul>
+<h2>教育背景</h2>
+<ul>
+<li><strong>电子科技大学｜硕士，网络工程学院</strong>｜2019.09 – 2022.06</li>
+<li><strong>电子科技大学｜本科，信息与通信工程学院</strong>｜2015.09 – 2019.06</li>
+</ul>
+<h2>工作经历</h2>
+<h3>Microsoft｜软件工程师，Microsoft Advertising / Microsoft AI</h3>
+<p><strong>2022.08 – 2026.08</strong></p>
+<h4>AI Agent 核心项目：Commit AI Resolver｜多智能体 Commit 语义分析系统</h4>
+<p><strong>JavaScript / SQLite FTS5 / sqlite-vec / RRF / MCP</strong></p>
+<ul>
+<li>设计并实现有界多智能体流水线：<strong>Intent Extractor → RAG Retriever → Answer Synthesizer → Answer Evaluator</strong>；Evaluator 可返回检索改写策略，最多迭代 3 轮，并以结果停滞信号提前终止。</li>
+<li>以 JSON 为可审计源数据、SQLite metadata/FTS5 与 sqlite-vec 为可重建索引；在约 2,300 条、34 天窗口的内部样本上融合关键词与稠密召回，并以加权 RRF 排序。</li>
+<li>将 embedding 模型/维度/query instruction 与索引版本配置化，支持 OpenAI-compatible 本地端点和公开 JSONL 离线数据；保留检索证据护栏及 18 个手工 badcase，自动化 Eval Harness 仍在规划。</li>
+<li>通过 Streamable HTTP 暴露 6 个 MCP 工具，覆盖语义检索、精确 Commit、日期/工单摘要、Diff 与条件查询，使 IDE Agent 可直接复用检索能力。</li>
+</ul>
+<h4>AI Agent 核心项目：adocag-server｜HiRAG 代码知识库与 Wiki 生成服务</h4>
+<p><strong>Python / FastAPI / tree-sitter / Leiden / Graph RAG / SSE</strong></p>
+<ul>
+<li>基于分层图 RAG 构建代码知识服务：通过 tree-sitter 做 AST 语义分块，抽取实体/关系，使用 Leiden 完成社区聚类与摘要，支持从函数级到架构级的多粒度问题。</li>
+<li>提供 hi_local、hi_global、hi_bridge 等分层检索模式，通过 FastAPI/SSE 输出 Wiki 与研究结果，并支持多 LLM 后端、Blob/Table 存储及索引刷新。</li>
+<li>将 deep_research 设计为最多 5 轮的有界关键词扩展 pipeline；围绕 Recall@K/MRR golden set、LLM 缓存及 token/latency 观测设计后续评测与优化方案。</li>
+</ul>
+<h4>广告 UI 项目</h4>
+<ul>
+<li>在大型 Microsoft Advertising Campaign UI 中累计完成 490+ 次生产合并，通过系统性性能优化将关键页面 P95 降低 <strong>40%–72%</strong>，并交付图片素材质量预测、第三方监测、Media Deal、广告推荐、A11y/i18n 与线上 DRI。</li>
+</ul>
+<h4>广告后端项目</h4>
+<p><strong>C#/.NET / WCF / SOAP / Bulk API / Task Engine / SQL Server / Azure Queue / Cosmos/ADLS</strong></p>
+<h5>图片资产生命周期治理</h5>
+<ul>
+<li>端到端设计并落地孤立图片资产的识别、清理与恢复链路，通过数据层多账户清理/激活存储过程和中间层 Kubernetes CronJob 完成批量治理。</li>
+<li>建设 WCF 邮件通知服务与邮件模板，为受影响账户提供通知，并通过错误处理、失败告警和多环境配置保障任务稳定运行。</li>
+<li>补充广告扩展与 Smart Page 的图片校验及功能测试，处理误报问题，并将 OSManagementDAM 相关能力迁移至中间层统一维护。</li>
+</ul>
+<h5>程序化 Deal 同步与投放治理</h5>
+<ul>
+<li>从 0 主导 Xandr Deal 到 MS Deal 的自动同步，完成 API 分页拉取、模型映射与校验、SOAP/Bulk/WCF 多入口一致性、定向约束、分市场灰度 GA 及旧版本安全下线。</li>
+</ul>
+<h5>视频推荐与创意生成任务链路</h5>
+<ul>
+<li>每日按配置批量捞取指定数量的广告，读取存储在 Cosmos/ADLS 中的数据库映射数据并为其生成推荐视频，同时通过 Azure Queue 限流、黑白名单、批量降级与部分成功机制保障外部生成 API 的稳定调用。</li>
+</ul>
+<h5>广告曝光与第三方测量服务</h5>
+<ul>
+<li>将 Ad Impression Tracking 迁移至 Task Engine，支持展示/视频广告及 IAS、MOAT、ISPOT 等第三方追踪，并补齐动态节奏控制、校验和变更历史审计。</li>
+</ul></main></body></html>
