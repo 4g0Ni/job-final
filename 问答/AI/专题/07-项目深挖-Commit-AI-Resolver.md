@@ -15,6 +15,8 @@
 
 拿到候选以后，我没有直接让 LLM 生成，而是先过 **Evidence Gate**，决定继续搜索、拒答还是向用户澄清。Agent 最多重试三轮，如果结果集合没有变化，就按 **Stale Retry** 停止并返回当前最好结果。系统还通过 MCP 暴露 6 个工具，让 IDE Agent 可以直接复用这些能力。
 
+Prompt 工程上，我把动态业务内容和 System Prompt 隔离，为 4 类 Agent 使用严格 JSON Schema，并在代码侧校验候选 Commit 和 URL。Prompt 由 Registry 统一管理，通过 stable/candidate 确定性分流，支持 kill switch 和连续失败自动回滚；10-case Golden Eval、CI 门禁与逐 Agent token、延迟和错误遥测构成第一版质量闭环，相关自动测试 185 项通过。
+
 评测上我分了两层：一套是 **75-case 工程回归集**，其中 23 条 frozen test 用来防止已知行为退化；另一套是 **461 条 Issue → Closing PR → Fix Commit 的 RCA cases**，目前是模型预审版，已经完成全量检索评测，但人工复核前不作为 release gate。这套 Eval 还真实发现了等权 RRF 挤掉 Dense 命中、长查询召回下降、Full SHA 和默认日期过滤等问题。下一步我会做“索引粗召回 + `git show/diff`、`rg` 和 symbol search 原始证据精查”。
 
 ## PROJ-02｜adocag-server 是 Agent 还是 Pipeline？
@@ -36,7 +38,7 @@
 **关键词：** **Human Review**、**Agent Eval**、**Fusion**、**Long Query**、**Observability**  
 **关联：** PROJ-09、PROJ-12、PROJ-13
 
-**参考答案：** 如果现在重做，我会先把评测做得更扎实。Commit AI Resolver 第一件事是完成 **461 条 case 的人工四项 Rubric**，再切分 Gold Dev 和 Frozen Test，并接入可用的 Chat API 跑完整 Agent 多次采样。第二件事是针对已经发现的**等权 RRF 和长查询问题**，优化 Query Condensation、Field-aware Embedding 和融合。第三件事才是补并发、ANN、权限、线上反馈和可回放 Trace。adocag-server 也一样，先有 Gold 和 Rubric，再决定要不要增加动态规划。
+**参考答案：** 如果现在重做，我会先把评测做得更扎实。Prompt 隔离、Structured Output、Registry、灰度回滚和第一版 Golden Eval 已经完成；下一步先完成 **461 条 case 的人工四项 Rubric**，切分 Gold Dev 和 Frozen Test，并接入可用的 Chat API 跑完整 Agent 多次采样。然后针对已经发现的**等权 RRF 和长查询问题**，优化 Query Condensation、Field-aware Embedding 和融合。最后才补并发、ANN、权限、线上反馈和可回放 Trace。adocag-server 也一样，先有 Gold 和 Rubric，再决定要不要增加动态规划。
 
 ## PROJ-05｜Coding Agent 已能用 `rg + git` 搜索，为什么还需要索引 RAG？
 

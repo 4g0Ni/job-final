@@ -26,7 +26,7 @@
 | 系统设计 / 工程化 | `问答/系统设计/系统设计-问题.md` | `问答/系统设计/系统设计-问题与答案.md` | 23 |
 | 行为面 / 项目复盘 | `问答/行为面/行为面-问题.md` | `问答/行为面/行为面-问题与答案.md` | 22 |
 
-“仅问题”文件适合闭卷模拟；“问题与答案”适合复盘。AI 问答已按 7 个专题拆分，统一加入关键词、关联题和重写答案，并合并 RRF、Evidence Gate、Eval Harness、MCP 工具化等重复问题。新增题覆盖岗位 JD 高频出现的 Dify、LangGraph、FastAPI/SSE、K8s、LLMOps、多租户、vLLM 与微调边界。
+“仅问题”文件适合闭卷模拟；“问题与答案”适合复盘。AI 问答已按 7 个专题拆分，统一加入关键词、关联题和重写答案，并合并 RRF、Evidence Gate、Eval Harness、MCP 工具化等重复问题。新增题覆盖岗位 JD 高频出现的 Dify、LangGraph、FastAPI/SSE、K8s、LLMOps、多租户、vLLM、微调边界，以及 System Prompt 隔离、Structured Output、版本实验、回滚和可观测性。
 
 ### 2.1 AI 知识地图
 

@@ -533,7 +533,7 @@ $$ n \approx \frac{(z_{1-\alpha/2}+z_{1-\beta})^2 \cdot 2\bar{p}(1-\bar{p})}{(\t
 
 ### 146. Prompt 里怎么防止注入攻击（prompt injection）？
 **为什么问**：AI 安全，加分项。
-**参考回答**：RAG 里检索到的内容可能含恶意指令（"忽略之前的指令…"）。防护：一是**把用户/检索内容和系统指令分离**，明确告诉模型检索内容只是"资料"不是"指令"；二是对输出做校验/过滤，尤其是会触发工具调用的场景要限制工具权限；三是最小权限原则，不让 LLM 直接执行高危操作。这也是我在评估工具输出时会保持警惕的点——不盲目信任外部内容。
+**参考回答**：RAG 里 query、历史、工单、Commit message、源码和 diff 都可能包含“忽略之前指令”一类内容。我在 Commit AI Resolver 中把它们统一放进 user message 并标记为不可信数据，System Prompt 只保留任务、安全边界和输出契约；同时用严格 JSON Schema、候选 Commit allowlist、canonical URL 和工具参数校验做代码侧约束。核心是“指令/数据分离 + 最小权限 + 确定性验证”，不能只靠一句防注入提示让模型自觉。
 
 ### 147. LangChain 帮你解决了什么？有没有觉得它的局限？
 **为什么问**：考察对框架的批判性认识。
@@ -545,7 +545,7 @@ $$ n \approx \frac{(z_{1-\alpha/2}+z_{1-\beta})^2 \cdot 2\bar{p}(1-\bar{p})}{(\t
 
 ### 149. 你怎么持续跟进快速变化的 LLM 技术？
 **为什么问**：考察学习能力（换 AI 岗关心）。
-**参考回答**：我是通过真实项目持续学习：在 adocag-server 中实践 AST 分块、分层图 RAG、检索模式和 SSE；在 Commit AI Resolver 中把单路 dense 检索演进为 JSON source of truth、SQLite FTS5 + sqlite-vec、metadata pre-filter、加权 RRF、索引版本契约、Evaluator 与 MCP。平时结合论文和官方文档理解原理，再用测试、trace 和真实 badcase 验证方案，而不是只停留在框架调用层。
+**参考回答**：我是通过真实项目持续学习：在 adocag-server 中实践 AST 分块、分层图 RAG、检索模式和 SSE；在 Commit AI Resolver 中把单路 dense 检索演进为混合检索与有界 Agent workflow，又把分散 Prompt 演进为不可信数据隔离、严格 Structured Output、Prompt Registry、Golden Eval、A/B、自动回滚和逐 Agent 遥测。平时结合论文和官方文档理解原理，再用测试、trace 和真实 badcase 验证方案，而不是只停留在框架调用层。
 
 ### 150. 从传统数据工程转 AI，你觉得自己的独特优势是什么？
 **为什么问**：考察自我定位。
@@ -573,7 +573,7 @@ $$ n \approx \frac{(z_{1-\alpha/2}+z_{1-\beta})^2 \cdot 2\bar{p}(1-\bar{p})}{(\t
 
 ### 155. 讲一次你主动学习新技术并落地的经历。
 **为什么问**：考察主动性和成长。
-**参考回答**（STAR）：**情境**：团队需要提升大型代码库的知识发现和 Commit 根因定位效率。**任务**：我需要把 RAG、Agent 编排和工具协议真正落到可使用、可验证的系统。**行动**：我在 adocag-server 中实现 AST 分块、实体关系、Leiden 社区和分层检索；又在 Commit AI Resolver 中实现 FTS5 + sqlite-vec 混合召回、metadata pre-filter、加权 RRF、Evidence Gate、Evaluator 有界重试和 6 个 MCP 工具，对 27,646 条公开 React Commit 完成路径/语义增强与索引，并建立 75-case 工程回归 Harness 和 461 条真实 Issue/closing PR/fix commit RCA gold cases（模型预审版）。**结果**：461 条已完成全量 retrieval Eval，发现等权 RRF 救回 9 条 Dense miss、却挤掉 27 条 Dense top-10 hit，以及长 issue query 的召回下降；形成了从代码知识构建、可重建索引、拒答/澄清门禁到逐 case badcase 诊断和 IDE Agent 工具接入的完整实践。当前仍明确：461 条完成人工复核后才进入 release gate，下一步是在线 LLM 全链路评测与大规模 ANN benchmark。
+**参考回答**（STAR）：**情境**：团队需要提升大型代码库的知识发现和 Commit 根因定位效率。**任务**：我需要把 RAG、Agent 编排和工具协议真正落到可使用、可验证、可演进的系统。**行动**：我在 adocag-server 中实现 AST 分块、实体关系、Leiden 社区和分层检索；又在 Commit AI Resolver 中实现 FTS5 + sqlite-vec 混合召回、metadata pre-filter、加权 RRF、Evidence Gate、Evaluator 有界重试和 6 个 MCP 工具，对 27,646 条公开 React Commit 完成路径/语义增强与索引，并建立 75-case 工程回归 Harness 和 461 条真实 Issue/closing PR/fix commit RCA gold cases（模型预审版）。可靠性方面，我进一步完成 System Prompt 数据隔离、严格 JSON Schema、版本 A/B、自动回滚、10-case Golden Eval 和逐 Agent 遥测，相关自动测试 185 项通过。**结果**：461 条已完成全量 retrieval Eval，发现等权 RRF 救回 9 条 Dense miss、却挤掉 27 条 Dense top-10 hit，以及长 issue query 的召回下降；形成了从代码知识构建、可重建索引、拒答/澄清门禁、IDE Agent 工具接入到 Prompt 质量门禁的完整实践。当前仍明确：461 条完成人工复核后才进入 release gate，真实模型全链路 reference baseline 与大规模 ANN benchmark 仍是下一步。
 
 ### 156. 你和同事在技术方案上有分歧时怎么处理？
 **为什么问**：协作能力。

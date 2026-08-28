@@ -33,6 +33,8 @@
 - 构建 **Direct SHA + FTS5 + Dense + Multi-query** 多路召回：精确标识符直接命中、结构化条件 pre-filter、语义改写与工单标题独立检索，再以 weighted RRF 融合不同量纲排名，并保留通道贡献用于诊断。
 - 在生成前加入确定性 Evidence Gate，综合精确命中、显式 metadata 约束、dense score 与多通道一致性，输出 SEARCH / ABSTAIN / ASK_USER，避免将“最近邻”误当成“足够证据”；答案层校验引用与 Commit 真实性。
 - 通过 Evaluator 驱动最多 3 轮有界重试，支持关键词/日期窗口调整，并以结果 ID 集合检测 stale retry、保留 best-so-far；通过 Streamable HTTP 暴露 6 个 MCP 工具，使 IDE Agent 可复用检索、Diff 与摘要能力。
+- 将动态业务内容与 System Prompt 隔离，为 4 类 Agent 引入严格 JSON Schema、候选 Commit/URL 确定性校验与兼容降级，降低 Prompt Injection、格式漂移和证据幻觉风险。
+- 建立 Prompt Registry、stable/candidate 确定性分流、kill switch 与连续失败自动回滚；以 10-case Golden Eval、CI 门禁和 SQLite 逐 Agent token/延迟/错误遥测形成 Prompt 质量闭环，相关自动测试 185 项通过。
 - 建立 75-case 版本化工程回归 Harness，并基于真实 GitHub Issue → closing PR → fix commit 构建、全量评测 461 条 RCA gold cases（模型预审版）；分层输出 Recall@K、MRR、nDCG、Brier/ECE 与逐 case trace，支持检索/RRF badcase 诊断及人工复核后冻结 release gate。
 
 #### 广告 UI 项目
