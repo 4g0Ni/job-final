@@ -4,63 +4,63 @@
 
 ## MCP-01｜MCP 解决什么问题？
 
-**关键词：** Model Context Protocol、能力发现、标准接口、Host/Client/Server  
+**关键词：** **Model Context Protocol**、**能力发现**、**标准接口**、**Host / Client / Server**  
 **关联：** MCP-02、MCP-03、PROJ-15
 
-**参考答案：** MCP 用统一协议把模型应用与工具、资源和提示模板连接起来，减少每个 Host 为每个数据源写专用适配器的成本。Server 暴露能力，Client 维护连接，Host 负责用户体验、模型选择和安全策略。MCP 标准化的是交互，不自动保证鉴权、可信或业务正确性。
+**参考答案：** 我理解 **MCP** 主要是在解决“模型应用怎么用统一方式接工具和数据源”这个问题。**Server** 暴露工具、资源或提示模板，**Client** 维护协议连接，**Host** 负责用户交互、模型选择和安全策略。这样就不用每个 Host 对每个数据源都重新写一套适配。不过我会特别说明，MCP 只是把交互标准化了，**不会自动解决鉴权、安全和业务正确性**。
 
 ## MCP-02｜MCP 的基本交互和生命周期是什么？
 
-**关键词：** initialize、capability negotiation、list、call/read、transport  
+**关键词：** **Initialize**、**Capability Negotiation**、**List**、**Call / Read**、**Transport**  
 **关联：** AGENT-04、MCP-01、MCP-04
 
-**参考答案：** Client 与 Server 建连后初始化并协商能力，再列出 tools/resources/prompts；Host 选择后发起调用或读取，Server 返回结构化 content/error。连接还涉及超时、取消、会话和版本兼容。生产中要记录 Server 身份、工具版本和调用 trace，并限制 Host 可见的能力集合。
+**参考答案：** 基本流程是：Client 和 Server 建连后先做 **Initialize 和能力协商**，然后列出 tools、resources、prompts；Host 决定用哪个能力，再发起 call 或 read，Server 返回结构化结果或者错误。真正到生产里，还要处理超时、取消、会话和版本兼容。我也会记录 Server 身份、工具版本和调用 Trace，并且只把当前任务需要的能力暴露给 Host。
 
 ## MCP-03｜MCP、Tool Calling、Skill 与 CLI 有什么区别？
 
-**关键词：** 协议、模型输出、工作流知识、命令接口  
+**关键词：** **协议**、**模型结构化输出**、**工作流知识**、**命令接口**  
 **关联：** AGENT-06、MCP-01、PROJ-15
 
-**参考答案：** Tool Calling 是模型生成结构化调用意图；MCP 是 Host 与外部能力之间的协议；Skill 是可复用的说明、流程和资产；CLI 是人或程序可调用的命令接口。它们可组合：Skill 教 Agent 何时做，模型发起 tool call，MCP 传输请求，Server 再调用 CLI/API。不要把四者当同一抽象层。
+**参考答案：** 这四个东西不在同一层。**Tool Calling** 是模型输出“我要调用什么”；**MCP** 是 Host 和外部能力之间怎么通信；**Skill** 更像可复用的操作说明、流程和资产；**CLI** 是真正可以执行的命令接口。它们可以串起来：Skill 告诉 Agent 怎么做，模型发起 Tool Call，MCP 把请求送出去，Server 最后再调用 CLI 或 API。
 
 ## MCP-04｜MCP 工具如何做安全治理？
 
-**关键词：** 最小权限、allowlist、schema validation、approval、审计  
+**关键词：** **最小权限**、**Allowlist**、**Schema Validation**、**Approval**、**审计**  
 **关联：** AGENT-04、EVAL-10、EVAL-11
 
-**参考答案：** 只向 Host 暴露任务需要的工具；校验 Server 身份、输入 schema、路径/域名/租户范围和输出大小；读与写权限分离，敏感或不可逆动作要求用户确认；凭据留在执行侧，不进入模型上下文。还需设置超时、速率限制、沙箱和审计，不能因为“用了 MCP”就默认安全。
+**参考答案：** 我会把 MCP Server 当成一个真正的外部执行入口来治理。只暴露任务需要的工具，校验 Server 身份、输入 Schema、路径、域名、租户范围和输出大小；读写权限分开，敏感或不可逆动作要求用户确认，凭据一直留在执行端，不进模型上下文。再加上**超时、限流、沙箱和审计**。用了 MCP 不代表天然安全。
 
 ## MCP-05｜MCP 与 A2A 有什么区别？
 
-**关键词：** tool/resource integration、agent collaboration、task lifecycle、互补  
+**关键词：** **Tool / Resource Integration**、**Agent Collaboration**、**Task Lifecycle**、**互补**  
 **关联：** AGENT-11、AGENT-12
 
-**参考答案：** MCP 主要标准化 Agent/模型应用如何访问工具和资源；A2A 类协议更关注不同 Agent 间的能力发现、任务委派、进度和产物交换。一个 Agent 可通过 MCP 使用数据库，同时通过 A2A 把子任务交给另一 Agent。二者互补，但多一层协议就多一层身份、授权和状态一致性问题。
+**参考答案：** 我会把它们分成两个方向：**MCP** 关注 Agent 怎么访问工具和资源，**A2A** 更关注 Agent 之间怎么发现能力、委派任务、同步进度和交换产物。比如一个 Agent 可以通过 MCP 查数据库，再通过 A2A 把分析任务交给另一个 Agent。它们是互补的，但每多一层协议，就要多处理一层身份、授权和状态一致性。
 
 ## MCP-06｜短期记忆、长期记忆、会话状态与 RAG 有什么关系？
 
-**关键词：** working memory、episodic、semantic、profile、retrieval  
+**关键词：** **Working Memory**、**Episodic Memory**、**Semantic Memory**、**Profile**、**Retrieval**  
 **关联：** LLM-04、MCP-07、RAG-11
 
-**参考答案：** 会话状态保存当前任务的确定字段；短期记忆是当前窗口和近期摘要；长期记忆可分用户偏好/事实、历史事件和可复用知识；RAG 是按查询检索外部知识的机制。它们可以共用存储技术，但写入策略、时效、权限和删除要求不同，不能把所有历史对话都无筛选向量化。
+**参考答案：** 我会先把它们按生命周期分开。**会话状态**保存当前任务的确定字段；**短期记忆**是当前窗口和最近摘要；**长期记忆**可以是用户偏好、历史事件或可复用知识；**RAG** 则是按当前问题去查外部知识。底层可能都用数据库或向量检索，但写入条件、时效、权限和删除规则完全不同，所以不能把所有聊天记录都直接向量化当长期记忆。
 
 ## MCP-07｜长期记忆如何写入、读取和防止污染？
 
-**关键词：** write policy、confidence、provenance、TTL、dedupe、user control  
+**关键词：** **Write Policy**、**Confidence**、**Provenance**、**TTL**、**去重**、**用户控制**  
 **关联：** MCP-06、EVAL-11
 
-**参考答案：** 只写稳定、有未来价值且允许保存的信息，并记录来源、置信度、时间和用户；敏感信息默认不持久化。读取时按任务、用户、时效和权限检索，冲突时保留版本并优先新鲜可信来源；提供查看、纠正和删除能力。模型推断不能未经确认升级成用户事实。
+**参考答案：** 长期记忆不是越多越好。我只会写入**比较稳定、以后确实有用，而且用户允许保存**的信息，同时记录来源、置信度、时间和所属用户。敏感信息默认不持久化。读取时再按任务、用户、时效和权限筛选；出现冲突就保留版本，优先更新、更可信的来源。用户还应该能查看、纠正和删除。模型自己的推断不能直接当成用户事实存下来。
 
 ## MCP-08｜LangChain、LangGraph、LlamaIndex、AutoGen、Semantic Kernel 如何选？
 
-**关键词：** 组件生态、状态图、数据/RAG、多Agent、企业SDK  
+**关键词：** **组件生态**、**状态图**、**数据 / RAG**、**多 Agent**、**企业 SDK**  
 **关联：** AGENT-10、MCP-09、PROJ-03
 
-**参考答案：** LangChain 偏通用组件与集成；LangGraph 强调有状态图、持久化和恢复；LlamaIndex 强在数据接入和 RAG；AutoGen 偏多 Agent 对话编排；Semantic Kernel 适合 .NET/Java/Python 的企业集成。先按状态复杂度、语言栈、可观测、部署和锁定成本选最小集合，核心业务接口要与框架解耦。
+**参考答案：** 我会按它们各自擅长的方向选：**LangChain** 偏通用组件和集成，**LangGraph** 强在有状态流程、持久化和恢复，**LlamaIndex** 更偏数据接入和 RAG，**AutoGen** 常用于多 Agent 编排，**Semantic Kernel** 对 .NET/Java/Python 企业应用比较友好。最后还是看状态复杂度、语言栈、可观测、部署和锁定成本，核心业务接口尽量不要绑死在某个框架上。
 
 ## MCP-09｜Dify / Coze 等低代码 Agent 平台适合什么场景？
 
-**关键词：** workflow、知识库、插件、快速验证、平台边界、私有化  
+**关键词：** **Workflow**、**知识库**、**插件**、**快速验证**、**平台边界**、**私有化**  
 **关联：** MCP-08、ENG-08
 
-**参考答案：** 适合快速搭建知识库问答、固定工作流、运营可配置应用和 PoC；可借助可视化节点、模型管理、日志和插件降低交付门槛。复杂状态、高性能执行、深度自定义权限或严格测试时，核心 Runtime 仍应代码化。面试应能讲清节点编排、变量作用域、错误分支、插件 schema、私有化部署和何时迁出平台。
+**参考答案：** **Dify/Coze** 很适合快速做知识库问答、固定工作流、运营可配置应用和 PoC，因为节点、模型、日志和插件都比较现成。但如果状态非常复杂、性能要求高、权限要深度定制，或者测试要求很严，我会把核心 Runtime 放回代码里。面试时我会重点讲清楚**节点编排、变量作用域、错误分支、插件 Schema、私有化部署，以及什么时候应该迁出平台**。
