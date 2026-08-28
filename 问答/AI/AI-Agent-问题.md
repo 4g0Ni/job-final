@@ -1,135 +1,105 @@
-# AI / Agent 问题
-
-> 仅含问题，用于闭卷练习；对应答案见同目录“问题与答案”文件。
-
-## A. LLM 与上下文基础
-
-- [ ] 1. 为什么主流生成式大模型多采用 Decoder-only？
-
-- [ ] 2. Prefix LM 与 Causal LM 有什么区别？
-
-- [ ] 3. RoPE、上下文长度与“无限长输入”是什么关系？
-
-- [ ] 4. DPO、PPO、GRPO 的核心差异？
-
-- [ ] 5. 如何处理模型结构化输出不稳定？
-
-- [ ] 6. Context Engineering 与 Prompt Engineering 有何区别？
-
-## B. Agent 架构、规划与工具
-
-- [ ] 7. Chatbot、Workflow、Agent、Multi-Agent 如何区分？
-
-- [ ] 8. ReAct 的核心机制是什么？
-
-- [ ] 9. Agent Harness 是什么？
-
-- [ ] 10. 一个新工具从定义到执行的完整链路？
-
-- [ ] 11. Agent 如何判断是否调用工具？
-
-- [ ] 12. 工具失败如何恢复？
-
-- [ ] 13. 如何避免无限循环和过度调用工具？
-
-- [ ] 14. 规划失败如何回退？
-
-- [ ] 15. 什么时候不该用 Agent？
-
-## C. RAG 与检索
-
-- [ ] 16. 讲清一个完整 RAG 链路。
-
-- [ ] 17. 代码 RAG 为什么不能只做固定长度分块？
-
-- [ ] 18. BM25 与向量检索如何融合？
-
-- [ ] 19. Rerank 为什么提高质量却可能拖慢 P95？如何优化？
-
-- [ ] 20. HyDE 的原理与风险？
-
-- [ ] 21. Small-to-Big / Parent-Child Retrieval 是什么？
-
-- [ ] 22. 如何评估检索而不是只评估最终回答？
-
-- [ ] 23. RAG 如何处理实时更新、删除与权限？
-
-## D. MCP、多 Agent 与记忆
-
-- [ ] 24. MCP 解决什么问题？
-
-- [ ] 25. MCP 的基本交互是什么？
-
-- [ ] 26. MCP、Tool Calling、Skill、CLI 有什么区别？
-
-- [ ] 27. MCP 与 A2A 有什么区别？
-
-- [ ] 28. 多 Agent 为什么可能不如单 Agent？
-
-- [ ] 29. 多 Agent 状态如何传递？
-
-- [ ] 30. 短期记忆、长期记忆和 RAG 的关系？
-
-## E. 评测、可观测性与安全
-
-- [ ] 31. Agent Eval 应包含哪些指标？
-
-- [ ] 32. LLM-as-Judge 有什么问题？如何提高可信度？
-
-- [ ] 33. 如何建立可复现 Eval Harness？
-
-- [ ] 34. Agent trace 应记录什么？
-
-- [ ] 35. Prompt Injection 如何防？
-
-- [ ] 36. 如何设计 Agent 的成本与延迟预算？
-
-## F. 结合公司 AI Agent 项目的高频追问
-
-- [ ] 37. 3 分钟讲 `commit-ai-resolver`。
-
-- [ ] 38. `adocag-server` 是 Agent 还是 Pipeline？
-
-- [ ] 39. 为什么 `commit-ai-resolver` 不直接用 LangGraph/CrewAI？
-
-- [ ] 40. 如果重做两个 AI 项目，优先改什么？
-
-- [ ] 41. Codex / Claude Code 已经能用 `rg + git` 做 agentic search，为什么还需要 BM25 + 向量检索 + RRF？
-
-- [ ] 42. 新增 Commit 后需要每天重新生成向量数据库吗？如何平衡成本？
-
-- [ ] 43. 向量检索总能返回 Top-K，为什么还需要 Evidence Gate？
-
-- [ ] 44. Evidence Gate 的阈值如何标定，并避免在测试集上过拟合？
-
-- [ ] 45. frozen test 指标达到 100%，为什么不能说系统已经解决了 RAG 可靠性？
-
-- [ ] 46. 无法继续使用公司内部 case 时，如何重新生成可信的验证集？
-
-- [ ] 47. 如何评测完整 Agent，而不只评 Retriever？
-
-- [ ] 48. Eval Harness 实际发现了哪些问题？如何证明它不是“为了展示而写的测试”？
-
-## G. Commit AI Resolver 亮点拆解：是什么、为什么、怎么做
-
-- [ ] 49. 亮点一：evidence-first 历史变更调查系统是什么？为什么这样定位？怎么实现？
-
-- [ ] 50. 亮点二：可审计 source of truth 与可重建索引是什么？为什么需要？怎么实现？
-
-- [ ] 51. 亮点三：Direct SHA、metadata、FTS5、dense 多路召回是什么？为什么不能只用向量检索？怎么实现？
-
-- [ ] 52. 亮点四：weighted RRF 是什么？为什么选它？怎么实现和诊断？
-
-- [ ] 53. 亮点五：Evidence Gate 是什么？为什么放在生成前？怎么标定与执行？
-
-- [ ] 54. 亮点六：有界 Agent 编排是什么？为什么不做无限自主搜索？怎么处理重试停滞？
-
-- [ ] 55. 亮点七：答案 grounding 与引用校验是什么？为什么只评语言质量不够？怎么做？
-
-- [ ] 56. 亮点八：分层 Eval Harness 是什么？为什么要分层？怎么防止漂亮指标误导？
-
-- [ ] 57. 亮点九：MCP 工具化是什么？为什么不是只做一个聊天 UI？怎么复用同一检索能力？
-
-- [ ] 58. 亮点十：如何把 RAG/RRF 与 `rg + git` agentic search 组合成下一代架构？
-
-## 参考
+# AI / Agent 仅问题清单（83 题）
+
+## 01｜LLM 与上下文工程（9）
+
+1. **LLM-01** 为什么主流生成式大模型多采用 Decoder-only？
+2. **LLM-02** Causal LM、Prefix LM 与 Encoder-Decoder 有什么区别？
+3. **LLM-03** RoPE、上下文窗口和“无限长输入”是什么关系？
+4. **LLM-04** 长对话怎样做 Context Engineering？
+5. **LLM-05** Context Engineering 与 Prompt Engineering 有何区别？
+6. **LLM-06** 如何处理结构化输出不稳定？
+7. **LLM-07** DPO、PPO、GRPO 的核心差异是什么？
+8. **LLM-08** SFT、LoRA/PEFT、偏好对齐与 RAG 应如何选？
+9. **LLM-09** 生产系统如何选择和路由模型？
+
+## 02｜RAG 与知识工程（13）
+
+10. **RAG-01** 请讲清一个完整的生产 RAG 链路。
+11. **RAG-02** 文档和代码为什么不能只做固定长度分块？
+12. **RAG-03** Embedding、向量库和索引参数怎么选？
+13. **RAG-04** BM25 与向量检索为什么要混合？
+14. **RAG-05** RRF 是什么，为什么常用于多路融合？
+15. **RAG-06** Rerank 为什么可能提高质量却拖慢 P95？
+16. **RAG-07** HyDE、Multi-query 和 Query Rewrite 如何取舍？
+17. **RAG-08** Parent-Child / Small-to-Big Retrieval 是什么？
+18. **RAG-09** 为什么 metadata 过滤应尽量前置？
+19. **RAG-10** 如何评估 Retriever，而不是只看最终答案？
+20. **RAG-11** RAG 如何处理更新、删除、多租户和权限？
+21. **RAG-12** GraphRAG / 知识图谱什么时候值得用？
+22. **RAG-13** 长查询为何可能让 Dense Retrieval 变差？如何处理？
+
+## 03｜Agent 架构与工具调用（13）
+
+23. **AGENT-01** Chatbot、Workflow、Agent、Multi-Agent 如何区分？
+24. **AGENT-02** ReAct 的核心机制是什么？
+25. **AGENT-03** Agent Runtime / Harness 应包含哪些组件？
+26. **AGENT-04** 一个新工具从定义到执行的完整链路是什么？
+27. **AGENT-05** Agent 如何判断是否调用工具？
+28. **AGENT-06** 如何设计 Tool / Function Calling 的 schema？
+29. **AGENT-07** 工具失败时如何恢复？
+30. **AGENT-08** 如何避免无限循环和过度调用工具？
+31. **AGENT-09** 规划失败时有哪些回退策略？
+32. **AGENT-10** 什么时候该用 LangGraph/状态机，而不是普通函数编排？
+33. **AGENT-11** 多 Agent 为什么可能不如单 Agent？什么时候值得用？
+34. **AGENT-12** 多 Agent 的状态如何传递？
+35. **AGENT-13** 什么时候不该用 Agent？
+
+## 04｜MCP、框架与记忆（9）
+
+36. **MCP-01** MCP 解决什么问题？
+37. **MCP-02** MCP 的基本交互和生命周期是什么？
+38. **MCP-03** MCP、Tool Calling、Skill 与 CLI 有什么区别？
+39. **MCP-04** MCP 工具如何做安全治理？
+40. **MCP-05** MCP 与 A2A 有什么区别？
+41. **MCP-06** 短期记忆、长期记忆、会话状态与 RAG 有什么关系？
+42. **MCP-07** 长期记忆如何写入、读取和防止污染？
+43. **MCP-08** LangChain、LangGraph、LlamaIndex、AutoGen、Semantic Kernel 如何选？
+44. **MCP-09** Dify / Coze 等低代码 Agent 平台适合什么场景？
+
+## 05｜Eval、可观测、安全与 LLMOps（14）
+
+45. **EVAL-01** Agent Eval 应包含哪些指标？
+46. **EVAL-02** LLM-as-Judge 有什么问题？如何提高可信度？
+47. **EVAL-03** 如何建立可复现的 Eval Harness？
+48. **EVAL-04** Agent trace 应记录什么？
+49. **EVAL-05** 如何建立可行动的 Bad Case 分类？
+50. **EVAL-06** 离线 Eval 与线上监控如何衔接？
+51. **EVAL-07** 门禁或拒答阈值如何标定？
+52. **EVAL-08** 如何设计 Agent 的成本与延迟预算？
+53. **EVAL-09** 语义缓存怎样做才不会返回错误或越权结果？
+54. **EVAL-10** Prompt Injection 如何防？
+55. **EVAL-11** 如何防止数据泄露、越权与敏感信息进入模型？
+56. **EVAL-12** 模型网关应提供哪些能力？
+57. **EVAL-13** Prompt、模型、索引如何做版本、灰度和回滚？
+58. **EVAL-14** 如何避免评测数据泄漏和“为了指标调题”？
+
+## 06｜生产工程与部署（10）
+
+59. **ENG-01** Python/FastAPI 的生产服务要注意什么？
+60. **ENG-02** SSE、WebSocket 和普通 HTTP 如何选？
+61. **ENG-03** 多租户 Agent/RAG 如何隔离？
+62. **ENG-04** Agent 工具的副作用、幂等和事务怎样设计？
+63. **ENG-05** 自托管模型用 vLLM/TGI 时要关注什么？
+64. **ENG-06** 什么时候用微调，什么时候用 RAG 或工具？
+65. **ENG-07** 如何对 Prompt/Agent 策略做 A/B 测试？
+66. **ENG-08** 怎样设计一个企业级 Agent 平台？
+67. **ENG-09** 如何做容量、性能与稳定性设计？
+68. **ENG-10** AI 应用如何做测试与发布？
+
+## 07｜Commit AI Resolver 项目深挖（15）
+
+69. **PROJ-01** 请用 60 秒和 3 分钟介绍 Commit AI Resolver。
+70. **PROJ-02** adocag-server 是 Agent 还是 Pipeline？
+71. **PROJ-03** 为什么项目没有直接使用 LangGraph/CrewAI？
+72. **PROJ-04** 如果重做两个 AI 项目，优先改什么？
+73. **PROJ-05** Coding Agent 已能用 `rg + git` 搜索，为什么还需要索引 RAG？
+74. **PROJ-06** 新增 Commit 是否要每天全量重建向量库？
+75. **PROJ-07** 为什么用 JSON 作为事实源、索引作为派生物？
+76. **PROJ-08** Direct SHA、metadata、FTS5、dense 和多查询如何分工？
+77. **PROJ-09** 为什么用 weighted RRF？评测发现了什么？
+78. **PROJ-10** Evidence Gate 为什么放在生成前？如何标定？
+79. **PROJ-11** 23-case frozen test 达到 100%，为什么不能说“可靠性已解决”？
+80. **PROJ-12** 如何用公开数据建设可信的 RCA 验证集？
+81. **PROJ-13** 如何评测完整 Agent？Harness 实际抓到了什么问题？
+82. **PROJ-14** 有界重试如何处理停滞？Evaluator 能看到什么？
+83. **PROJ-15** 如何做 grounding、MCP 工具化和下一代架构？

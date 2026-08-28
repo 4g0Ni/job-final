@@ -15,18 +15,24 @@
 2. **MT 版**完整保留广告后端的四个小节，将广告 UI 项目压缩为一句话；
 3. 两版均保留相同联系方式、教育背景和 Commit AI Resolver，并分别调整岗位标题与个人概述。
 
-### 2. 分类问答库（共 513 题）
+### 2. 分类问答库（共 538 题）
 
 | 大类 | 仅问题 | 问题与答案 | 题数 |
 |---|---|---|---:|
 | UI / 前端 | `问答/UI/UI-问题.md` | `问答/UI/UI-问题与答案.md` | 166 |
 | MT / 后端 / 中间层 | `问答/MT/MT-问题.md` | `问答/MT/MT-问题与答案.md` | 112 |
-| AI / Agent | `问答/AI/AI-Agent-问题.md` | `问答/AI/AI-Agent-问题与答案.md` | 58 |
+| AI / Agent | `问答/AI/AI-Agent-问题.md` | `问答/AI/AI-Agent-问题与答案.md`（专题入口） | 83 |
 | Metrics / 数据 / 统计 | `问答/Metrics/Metrics-问题.md` | `问答/Metrics/Metrics-问题与答案.md` | 132 |
 | 系统设计 / 工程化 | `问答/系统设计/系统设计-问题.md` | `问答/系统设计/系统设计-问题与答案.md` | 23 |
 | 行为面 / 项目复盘 | `问答/行为面/行为面-问题.md` | `问答/行为面/行为面-问题与答案.md` | 22 |
 
-“仅问题”文件适合闭卷模拟；“问题与答案”适合复盘。AI 答案已纠正部分常见但不严谨的说法，例如：MCP 全称、DPO 与 RLHF 的关系、Pipeline 与 Agent 的边界、LLM-as-Judge 的局限。
+“仅问题”文件适合闭卷模拟；“问题与答案”适合复盘。AI 问答已按 7 个专题拆分，统一加入关键词、关联题和重写答案，并合并 RRF、Evidence Gate、Eval Harness、MCP 工具化等重复问题。新增题覆盖岗位 JD 高频出现的 Dify、LangGraph、FastAPI/SSE、K8s、LLMOps、多租户、vLLM 与微调边界。
+
+### 2.1 AI 知识地图
+
+- `AI知识地图/AI-Agent知识思维导图.md`
+
+思维导图把 LLM、RAG、Agent Runtime、MCP/记忆、Eval/安全/LLMOps、生产工程和项目证据串成一条端到端链路，适合先搭骨架再回到专题题目。
 
 ### 3. 面经研究
 
@@ -52,12 +58,18 @@
 
 1. 2022.08 是否为准确入职时间。
 2. 如有可公开作品，再增加 GitHub / 作品集；公司内部仓库不要公开。
-3. Commit AI Resolver 对外统一为“当前公开离线实现 + 历史内部背景”：当前已完成 10,000 条公开 React Commit 建库、混合检索、Evidence Gate、75-case 版本化 Eval Harness 与 Agent 批量评测基础设施；23-case frozen test 的 Hybrid Recall@10 和 Evidence Gate 行为准确率均为 100%，仅作为工程回归基线，不表述为外部盲测或生产效果。大规模 ANN benchmark、真实人工 RCA holdout 与在线全链路评测仍是下一阶段。
+3. Commit AI Resolver 对外统一为“当前公开离线实现 + 历史内部背景”：当前已完成 27,646 条公开 React Commit 的完整 metadata/路径增强、混合检索、Evidence Gate、75-case 版本化工程回归集，以及 461 条由真实 GitHub Issue → closing PR → corpus fix commit 构成的 RCA gold cases（当前为模型预审版）全量检索 Eval。75-case 中 23-case frozen test 的 Hybrid Recall@10 和 Evidence Gate 行为准确率均为 100%；461-case gold set 当前用于 badcase 诊断，人工复核完成后再冻结为 release-gate gold。两组指标都不表述为外部盲测或生产效果；在线全链路评测与大规模 ANN benchmark 仍是下一阶段。
 4. 对外讲述时不要泄露微软内部客户、账户、路径和未公开数据。
+
+### Commit AI Resolver 统一术语
+
+- **75-case engineering regression set：**程序化/固定样例组成的工程回归集，用来防止已知行为退化。
+- **461 RCA gold cases：**来自真实 GitHub Issue → closing PR → corpus fix commit 的完整 gold-case 建设集；当前版本已完成模型预审和全量 retrieval Eval。
+- **release-gate gold：**461 条中完成人工四项 rubric、切分并冻结后的版本。对外可以把完整 461 条称为 gold cases，但提到当前指标时应保留“模型预审版”这一阶段说明。
 
 ## 建议使用顺序
 
 1. 先看新简历与审计文件，统一事实口径。
 2. 每天从“仅问题”文件抽题口述，再对照答案。
-3. 优先准备 AI 58 题、系统设计 23 题，以及 UI/MT/Metrics 中与目标 JD 最相关的部分。
+3. 优先准备 AI 83 题中的岗位高频链路、系统设计 23 题，以及 UI/MT/Metrics 中与目标 JD 最相关的部分。
 4. 每个项目准备 60 秒、3 分钟、10 分钟三种版本，并准备一条失败/复盘故事。

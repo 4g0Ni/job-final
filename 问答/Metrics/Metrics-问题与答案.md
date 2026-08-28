@@ -573,7 +573,7 @@ $$ n \approx \frac{(z_{1-\alpha/2}+z_{1-\beta})^2 \cdot 2\bar{p}(1-\bar{p})}{(\t
 
 ### 155. 讲一次你主动学习新技术并落地的经历。
 **为什么问**：考察主动性和成长。
-**参考回答**（STAR）：**情境**：团队需要提升大型代码库的知识发现和 Commit 根因定位效率。**任务**：我需要把 RAG、Agent 编排和工具协议真正落到可使用、可验证的系统。**行动**：我在 adocag-server 中实现 AST 分块、实体关系、Leiden 社区和分层检索；又在 Commit AI Resolver 中实现 FTS5 + sqlite-vec 混合召回、metadata pre-filter、加权 RRF、Evidence Gate、Evaluator 有界重试和 6 个 MCP 工具，并基于 10,000 条公开 Commit 建立 75-case 版本化 Eval Harness。**结果**：形成了从代码知识构建、可重建检索索引、拒答/澄清门禁到 IDE Agent 工具接入的完整实践；当前 23-case frozen regression test 的 Hybrid Recall@10 与 Evidence Gate 行为准确率均为 100%，同时明确它不是外部盲测，下一步是人工 RCA holdout、在线 LLM 全链路评测与大规模 ANN benchmark。
+**参考回答**（STAR）：**情境**：团队需要提升大型代码库的知识发现和 Commit 根因定位效率。**任务**：我需要把 RAG、Agent 编排和工具协议真正落到可使用、可验证的系统。**行动**：我在 adocag-server 中实现 AST 分块、实体关系、Leiden 社区和分层检索；又在 Commit AI Resolver 中实现 FTS5 + sqlite-vec 混合召回、metadata pre-filter、加权 RRF、Evidence Gate、Evaluator 有界重试和 6 个 MCP 工具，对 27,646 条公开 React Commit 完成路径/语义增强与索引，并建立 75-case 工程回归 Harness 和 461 条真实 Issue/closing PR/fix commit RCA gold cases（模型预审版）。**结果**：461 条已完成全量 retrieval Eval，发现等权 RRF 救回 9 条 Dense miss、却挤掉 27 条 Dense top-10 hit，以及长 issue query 的召回下降；形成了从代码知识构建、可重建索引、拒答/澄清门禁到逐 case badcase 诊断和 IDE Agent 工具接入的完整实践。当前仍明确：461 条完成人工复核后才进入 release gate，下一步是在线 LLM 全链路评测与大规模 ANN benchmark。
 
 ### 156. 你和同事在技术方案上有分歧时怎么处理？
 **为什么问**：协作能力。
