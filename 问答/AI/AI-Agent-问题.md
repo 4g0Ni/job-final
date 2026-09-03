@@ -1,4 +1,4 @@
-# AI / Agent 仅问题清单（83 题）
+# AI / Agent 仅问题清单（84 题）
 
 ## 01｜LLM 与上下文工程（9）
 
@@ -86,7 +86,7 @@
 67. **ENG-09** 如何做容量、性能与稳定性设计？
 68. **ENG-10** AI 应用如何做测试与发布？
 
-## 07｜Commit AI Resolver 项目深挖（15）
+## 07｜Commit AI Resolver 项目深挖（16）
 
 69. **PROJ-01** 请用 60 秒和 3 分钟介绍 Commit AI Resolver。
 70. **PROJ-02** adocag-server 是 Agent 还是 Pipeline？
@@ -103,3 +103,4 @@
 81. **PROJ-13** 如何评测完整 Agent？Harness 实际抓到了什么问题？
 82. **PROJ-14** 有界重试如何处理停滞？Evaluator 能看到什么？
 83. **PROJ-15** 如何做 grounding、MCP 工具化和下一代架构？
+84. **PROJ-16** 新的 Issue 时间窗和本地 LTR 到底如何工作？

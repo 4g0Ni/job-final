@@ -139,14 +139,21 @@ mindmap
         23-case frozen test
         461 RCA cases模型预审版
       关键Bad Case
-        RRF救9挤27
-        长查询召回下降
+        早期等权RRF救9挤27
+        Top100候选上限85.82%
         Full SHA
         默认日期误放行
+      Issue-grounded优化
+        createdAt-7d到closedAt+30d
+        四路Top100候选池
+        本地LTR 35个features
+        test Recall@20 94.78%
       下一代
+        461条人工rubric
+        开放Issue单独评测
         索引粗召回
         rg/git/symbol原始证据精查
-      题号 PROJ-01~15
+      题号 PROJ-01~16
 ```
 
 ## 一张图记住问题之间的因果关系

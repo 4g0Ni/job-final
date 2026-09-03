@@ -12,7 +12,7 @@
 | 4 | [MCP、框架与记忆](专题/04-MCP多Agent与记忆.md) | 9 | 协议层、框架选择、记忆治理与低代码平台 |
 | 5 | [Eval、可观测、安全与 LLMOps](专题/05-Eval可观测安全与LLMOps.md) | 14 | 质量闭环、成本、安全、灰度和回滚 |
 | 6 | [生产工程与部署](专题/06-生产工程与部署.md) | 10 | FastAPI/SSE、多租户、模型服务、稳定性 |
-| 7 | [Commit AI Resolver 项目深挖](专题/07-项目深挖-Commit-AI-Resolver.md) | 15 | 统一项目事实、指标边界与追问 |
+| 7 | [Commit AI Resolver 项目深挖](专题/07-项目深挖-Commit-AI-Resolver.md) | 16 | 统一项目事实、指标边界与追问 |
 
 ## 推荐学习链路
 
