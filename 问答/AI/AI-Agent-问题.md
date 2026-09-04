@@ -86,11 +86,11 @@
 67. **ENG-09** 如何做容量、性能与稳定性设计？
 68. **ENG-10** AI 应用如何做测试与发布？
 
-## 07｜Commit AI Resolver 项目深挖（16）
+## 07｜Commit AI Resolver 项目深挖（20）
 
 69. **PROJ-01** 请用 60 秒和 3 分钟介绍 Commit AI Resolver。
 70. **PROJ-02** adocag-server 是 Agent 还是 Pipeline？
-71. **PROJ-03** 为什么项目没有直接使用 LangGraph/CrewAI？
+71. **PROJ-03** 为什么选择 OpenAI Agents SDK，而不是 LangGraph 或 CrewAI？
 72. **PROJ-04** 如果重做两个 AI 项目，优先改什么？
 73. **PROJ-05** Coding Agent 已能用 `rg + git` 搜索，为什么还需要索引 RAG？
 74. **PROJ-06** 新增 Commit 是否要每天全量重建向量库？
@@ -101,6 +101,10 @@
 79. **PROJ-11** 23-case frozen test 达到 100%，为什么不能说“可靠性已解决”？
 80. **PROJ-12** 如何用公开数据建设可信的 RCA 验证集？
 81. **PROJ-13** 如何评测完整 Agent？Harness 实际抓到了什么问题？
-82. **PROJ-14** 有界重试如何处理停滞？Evaluator 能看到什么？
+82. **PROJ-14** Multi-Agent 如何避免循环、过度调用和无证据结论？
 83. **PROJ-15** 如何做 grounding、MCP 工具化和下一代架构？
 84. **PROJ-16** 新的 Issue 时间窗和本地 LTR 到底如何工作？
+85. **PROJ-17** Commit AI Resolver 暴露了哪 6 个 MCP 工具？它们怎样提供给 IDE Agent？
+86. **PROJ-18** 为什么 RCA Retrieval 改完以后必须重做 Evidence Gate？
+87. **PROJ-19** 为什么现在可以称为真正的 Multi-Agent，而不是把 Workflow 换了名字？
+88. **PROJ-20** 真实 RCA 跑出了什么结果？如何评价它的质量、成本和边界？

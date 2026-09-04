@@ -1,23 +1,23 @@
-# 07｜项目深挖：Commit AI Resolver（16 题）
+# 07｜项目深挖：Commit AI Resolver（20 题）
 
 > 对外统一口径：当前公开版本是离线可复现 Demo，不描述为已部署 Azure 的线上生产系统；不泄露微软内部客户、账户、路径和数据。
 
 ## PROJ-01｜请用 60 秒和 3 分钟介绍 Commit AI Resolver。
 
-**关键词：** **Evidence-first**、**27,646**、**Hybrid Retrieval**、**Evidence Gate**、**MCP**、**Eval**  
-**关联：** PROJ-07、PROJ-08、PROJ-10、PROJ-13
+**关键词：** **Evidence-first**、**27,646**、**Multi-Agent**、**Harness**、**Evidence Gate**、**Eval**
+**关联：** PROJ-07、PROJ-08、PROJ-10、PROJ-13、PROJ-19、PROJ-20
 
 **参考答案：**
 
-**60 秒版：** 这个项目叫 **Commit AI Resolver**，主要解决跨仓库历史变更和回归调查的问题。公开 Demo 里，我对 **27,646 条 React Commit** 建了可重建索引。检索时不是只做向量搜索，而是把 Direct SHA、Metadata、FTS5、Dense 和多查询召回结合起来，再用 **Weighted RRF** 融合。生成答案以前还有一层 **Evidence Gate**，证据不够就拒答或者让用户补信息；生成以后再用确定性程序检查引用。整个能力通过 **6 个 MCP 工具**复用，并用分层 Eval 分别评估索引、召回、融合、门禁、引用和重试。
+**60 秒版：** 这个项目叫 **Commit AI Resolver**，主要解决跨仓库历史变更和回归调查。公开 Demo 对 **27,646 条 React Commit** 建了可重建索引，使用 Direct SHA、Metadata、FTS5、Dense 和 Weighted RRF 生成候选。控制面基于 OpenAI Agents SDK：Incident Commander 根据问题和当前证据，动态决定是否委派 Retrieval、Diff Investigator 和 Evidence Critic。SDK 外还有一层 Harness，强制执行工具权限、Candidate Ledger、多维预算、超时、校验、Trace 和 workflow 回退。真实 gold RCA 已跑通完整三专家路径并命中目标修复 Commit；Critic 因未找到 introducing commit，把结论降为 PARTIAL，而不是让 Supervisor 过度断言。
 
 **3 分钟版：** 我当时想解决的是，线上出现回归以后，怎么从很长的 Commit 历史里快速找到可能相关的变更，而且不能让模型拿一个弱相关结果就编成根因。所以离线侧我先把公开 Commit 做成可审计的 JSON 事实源，再构建 SQLite Metadata、FTS5 和 sqlite-vec 这些可重建索引。在线侧根据查询类型分流：SHA 直接查，repo、日期、作者走结构化过滤，错误码和路径走 FTS5，自然语言症状走 Dense，多路结果再用 RRF 融合。
 
-拿到候选以后，我没有直接让 LLM 生成，而是先过 **Evidence Gate**，决定继续搜索、拒答还是向用户澄清。Agent 最多重试三轮，如果结果集合没有变化，就按 **Stale Retry** 停止并返回当前最好结果。系统还通过 MCP 暴露 6 个工具，让 IDE Agent 可以直接复用这些能力。
+控制面最初是固定的 Intent → Retrieval → Gate → Synthesis → Evaluation workflow。为了让模型真正决定调查路径，我后来用 OpenAI Agents SDK 的 manager/agents-as-tools 模式，把它重构为 Incident Commander、Retrieval、Diff Investigator 和 Evidence Critic 四类 Agent。Supervisor 只能看到三个 Specialist 工具，根据问题和当前证据决定委派谁；普通查询可以只检索，RCA 可以继续读取 Top-N Diff 并调用独立 Critic。旧 workflow 仍作为 feature-flag baseline 和故障回退。
 
-Prompt 工程上，我把动态业务内容和 System Prompt 隔离，为 4 类 Agent 使用严格 JSON Schema，并在代码侧校验候选 Commit 和 URL。Prompt 由 Registry 统一管理，通过 stable/candidate 确定性分流，支持 kill switch 和连续失败自动回滚；10-case Golden Eval、CI 门禁与逐 Agent token、延迟和错误遥测构成第一版质量闭环，相关自动测试 185 项通过。
+我没有把所有安全性都交给 SDK。应用侧 Harness 维护 request-local Run State、工具白名单、Candidate Ledger、调用去重、单工具超时，以及 Agent/Tool/Diff/总时长预算。只有检索返回并授权过的候选才能读取 Diff 或进入最终引用；Zod 和代码规则还会验证结构化输出、Commit/URL 和置信度。动态 Commit、Issue、Diff 统一作为不可信数据。Structured Output 会按 provider 能力选择原生 JSON Schema，或 JSON Object + 本地 Zod 二次校验。系统还通过 MCP 暴露 6 个只读工具，并在 JSON/SSE eval 模式输出 bounded trajectory、critic verdict 和 prompt metrics。
 
-评测上我分了两层：一套是 **75-case 工程回归集**，其中 23 条 frozen test 用来防止已知行为退化；另一套是 **461 条 Issue → Closing PR → Fix Commit 的 RCA gold cases**，目前是模型预审版，已经完成全量检索评测，但人工复核前不作为 release gate。针对 Issue-grounded 场景，我只用 Issue 的创建/关闭时间建立 `createdAt - 7d → closedAt + 30d` 窗口，再用本地 LTR 重排四路候选；在 grouped 134-case held-out test 上，Recall@20 从 **70.90% 提高到 94.78%**，Recall@10 为 **92.54%**。这条结果没有使用 LLM reranker，也不能外推到没有 Issue 时间信息的普通文本查询。下一步是人工复核 gold、单独验证开放 Issue，并增加 `git show/diff`、`rg` 和 symbol search 原始证据精查。
+评测上我分了两层：一套是 **75-case 工程回归集**，其中 23 条 frozen test 用来防止已知行为退化；另一套是 **461 条 Issue → Closing PR → Fix Commit 的 RCA gold cases**，目前是模型预审版，已经完成全量检索评测，但人工复核前不作为 release gate。针对 Issue-grounded 场景，我只用 Issue 的创建/关闭时间建立 `createdAt - 7d → closedAt + 30d` 窗口，再用本地 LTR 重排四路候选；在 grouped 134-case held-out test 上，Recall@20 从 **70.90% 提高到 94.78%**，Recall@10 为 **92.54%**。这条结果没有使用 LLM reranker，也不能外推到没有 Issue 时间信息的普通文本查询。下一步是对 frozen RCA cases 批量运行 workflow/multi-agent paired eval，重点比较任务成功率、路由正确率、P95、调用量和每成功任务成本。
 
 ## PROJ-02｜adocag-server 是 Agent 还是 Pipeline？
 
@@ -26,19 +26,19 @@ Prompt 工程上，我把动态业务内容和 System Prompt 隔离，为 4 类 
 
 **参考答案：** 我会比较诚实地说，它现在更像一个分层的 **Graph RAG / Deep-research Pipeline**，还不是完全自主的 Agent。AST 分块、实体关系、Leiden 社区、分层检索和 Wiki 生成都有明确阶段；虽然 deep_research 最多能迭代五轮，但它什么时候扩展、什么时候停止，主要还是固定流程控制的。这样讲反而能说明我理解 **Pipeline 和 Agent 的边界**，而不是为了包装什么都叫 Agent。
 
-## PROJ-03｜为什么项目没有直接使用 LangGraph/CrewAI？
+## PROJ-03｜为什么选择 OpenAI Agents SDK，而不是 LangGraph 或 CrewAI？
 
-**关键词：** **最小复杂度**、**固定角色**、**有界重试**、**可调试**  
+**关键词：** **Agents-as-tools**、**模型决策**、**Node ESM**、**Harness 分层**
 **关联：** AGENT-10、MCP-08
 
-**参考答案：** 当时我没有直接上 LangGraph，是因为当前流程只有几个固定职责，再加一个最多三轮的反馈环，用普通函数编排反而更轻，状态和 Trace 也更容易看清。如果以后出现**长任务持久化、复杂动态分支、人工恢复或者跨进程执行**，我会考虑引入显式状态图。我的原则是先看运行语义是不是真的需要，而不是把框架名字当成项目能力。
+**参考答案：** 第一版固定 workflow 用普通函数最合适，因为路径短、容易建立 baseline。重构时我的目标是让 Supervisor 通过真实 tool call 决定调用哪个 Specialist，而不是先引入长任务持久化，所以选择了和现有 Node ESM、Zod、OpenAI-compatible endpoint 更贴合的 OpenAI Agents SDK。它的 manager/agents-as-tools 模式正好能把 Retrieval、Diff Investigator 和 Critic 暴露成受控工具。我仍把 Candidate Ledger、权限、预算、超时、校验、Trace 和 fallback 放在自建 Harness 中，避免业务可靠性绑死在 SDK。若以后需要跨进程恢复、人审暂停或复杂状态回放，再评估 LangGraph；如果主要目标是角色协作 demo，CrewAI 更快，但当前项目更看重确定性边界和可测性。
 
 ## PROJ-04｜如果重做两个 AI 项目，优先改什么？
 
 **关键词：** **Human Review**、**Open Issue**、**Agent Eval**、**Raw Evidence**、**Observability**
 **关联：** PROJ-09、PROJ-12、PROJ-13
 
-**参考答案：** 如果现在重做，我会先把评测做得更扎实。Prompt 隔离、Structured Output、Registry、灰度回滚、第一版 Golden Eval，以及 461-case 上的 Issue 时间窗和本地 LTR 实验都已经完成；下一步先完成 **461 条 case 的人工四项 Rubric**，冻结 release-gate Gold Dev/Test，并优先人工审查最后 7 条 Top-20 failure。然后单独验证开放 Issue 的 `createdAt → now` 时间窗，接入可用 Chat API 跑完整 Agent 多次采样，再补 `git show/diff`、`rg`、symbol search 原始证据精查。最后才是并发、ANN、权限、线上反馈和可回放 Trace。adocag-server 也一样，先有 Gold 和 Rubric，再决定要不要增加动态规划。
+**参考答案：** 如果现在重做，我会更早建立 workflow baseline、trajectory schema 和 provider contract test，再开始 multi-agent 重构。当前 Prompt 隔离、Structured Output、四 Agent vertical slice、GitHub Diff、bounded Harness，以及一条真实 Chat API gold RCA 已经跑通；下一步先完成 **461 条 case 的人工四项 Rubric**，冻结 release-gate Gold Dev/Test，并批量比较 workflow 与 multi-agent 的任务成功率、路由、P95、调用量和每成功任务成本。随后补开放 Issue 实验、`rg`/symbol search 源码精查、取消传播和并行调查。只有出现长任务恢复或人审暂停需求时才增加状态图复杂度，不能把单次成功 demo 当成上线证据。
 
 ## PROJ-05｜Coding Agent 已能用 `rg + git` 搜索，为什么还需要索引 RAG？
 
@@ -80,7 +80,9 @@ Prompt 工程上，我把动态业务内容和 System Prompt 隔离，为 4 类 
 **关键词：** **Nearest ≠ Sufficient**、**SEARCH**、**ABSTAIN**、**ASK_USER**、**Calibration**  
 **关联：** EVAL-07、PROJ-11
 
-**参考答案：** 向量库对任何问题都能找出最近邻，但**最近不等于证据足够**。如果直接让模型生成，很容易把弱相关结果讲成确定结论。所以我在生成前加了 Evidence Gate，综合 Exact Hit、用户显式过滤、Dense Score、多通道一致性和查询约束，输出 **SEARCH、ABSTAIN 或 ASK_USER**。阈值只在 Dev 集按误答和拒答成本标定，Frozen Test 做回归，线上再继续看 Precision/Recall、Brier/ECE 和拒答成本。
+**参考答案：** 向量库对任何问题都能找出最近邻，但**最近不等于证据足够**。所以通用查询链路在生成前有确定性 Evidence Gate，综合 Exact Hit、用户显式过滤、Dense Score、多通道一致性和查询约束，输出 **SEARCH、ABSTAIN 或 ASK_USER**。
+
+RCA 检索升级后，我没有直接沿用旧阈值。时间预过滤会改变 score 和 Top-K 分布，四路候选加 LTR 后也不再只有单一 Dense Score；更危险的是，旧规则把“存在显式 metadata 条件且结果非空”视为强证据，如果把系统推导的 Issue 生命周期窗口伪装成用户显式日期，几乎所有非空结果都可能被放行。因此 Gate v2 先保留查询充分性检查，再区分 `user-explicit`、`issue-lifecycle`、`automatic-default` 和 `retry-expansion` 四种 filter provenance；排序后综合四路命中/排名、Dense-Lexical 共识、LTR top-1 与 top-1/top-2 margin、候选分布和 Diff 原始证据。LTR 的 `predict_proba` 受样本加权影响，不能直接当校准概率；阈值应只在 dev 上用 Platt/Isotonic 或 rank quantile 标定，并用 grouped held-out test 验证。当前 v1 在线运行，v2 已完成设计，待补 hard negative、错配 Issue、OOD、歧义和 candidate/ranking miss 后接入，不能把 23 条旧 frozen test 的 100% 行为准确率直接迁移过来。
 
 ## PROJ-11｜23-case frozen test 达到 100%，为什么不能说“可靠性已解决”？
 
@@ -101,21 +103,21 @@ Prompt 工程上，我把动态业务内容和 System Prompt 隔离，为 4 类 
 **关键词：** **Layered Eval**、**End-to-end**、**Full SHA**、**Explicit Filter**、**Fusion Bad Case**  
 **关联：** EVAL-01、EVAL-03、EVAL-05
 
-**参考答案：** 我的 Eval 是两条线：一条分层测索引、Intent、Recall/MRR/nDCG、Gate、引用和循环；另一条让端到端 Runner 多次执行，看任务正确性、幻觉引用、重试、停滞、P95、token 和费用。这个 Harness 确实抓到过几类真实问题：只存短 SHA 导致 **Full SHA 查不到**，默认 30 天窗口被误当用户显式条件而错误放行，等权 RRF 挤掉 Dense 命中，长查询召回下降，还有 **Stale Retry**。最近它又用 candidate availability 证明 Top-100 pool 的 85.82% 上限才是 Recall@20 的主要瓶颈，从而把优化方向从“继续换 reranker”改成 Issue 时间预过滤。它的价值是先暴露失败、定位层级，再把失败固定住，不是为了展示一个漂亮均分。
+**参考答案：** 我的 Eval 是两条线：一条分层测索引、Intent、Recall/MRR/nDCG、Gate、引用和循环；另一条让端到端 Runner 多次执行，看任务正确性、路由、幻觉引用、停滞、P95、token 和费用。Harness 先后抓到 Full SHA 查不到、默认日期被误当显式条件、等权 RRF 挤掉 Dense 命中、长查询召回下降、Stale Retry，以及 Top-100 候选池只有 85.82% 的重排上限。真实 provider 联调又暴露出 DeepSeek 不支持 `json_schema`、thinking mode 与 required tool choice 冲突、模型把 null 和数字写成字符串、本地 embedding 服务未启动，以及 GitHub 网页 Diff 超时。修复后改为 provider-aware Structured Output、本地 Zod 校验、参数归一化、固定 GitHub REST API 和可选 token。这个过程体现了 Harness 的价值：不仅测答案，还能定位失败发生在 provider contract、工具、检索、证据还是控制循环。
 
-## PROJ-14｜有界重试如何处理停滞？Evaluator 能看到什么？
+## PROJ-14｜Multi-Agent 如何避免循环、过度调用和无证据结论？
 
-**关键词：** **最多 3 轮**、**Best-so-far**、**Result-set Fingerprint**、**PARTIAL**、**职责分离**  
+**关键词：** **多维预算**、**Candidate Ledger**、**去重**、**Critic**、**PARTIAL**
 **关联：** AGENT-08、EVAL-04
 
-**参考答案：** 我的设计是让 Evaluator 最多只能建议 **3 轮**，它可以调整关键词或者日期窗口。每一轮都保存候选并维护 Best-so-far，再用 `repo:id` 集合比较相邻结果；如果没有新证据，就判成 Stale Retry，以 **PARTIAL** 结束。Synthesizer 普通查询最多看 10 条 Commit，工单查询最多 15 条。还有一个职责边界：Answer Evaluator LLM 只看答案和聚合检索元数据，不看逐条 Raw Commit；引用真实性和 Gold Evidence Coverage 由确定性 Scorer 检查。
+**参考答案：** 旧 workflow 保留最多 3 轮和 result-set fingerprint；新 multi-agent 再增加独立的 Agent、Tool、Diff、同工具次数、Supervisor turns 和 wall-clock 预算。Harness 缓存参数相同的重复调用，只有 Candidate Ledger 授权过的 Commit 才能读取 Diff 或被引用；有实质新信息时允许再次委派 Retrieval 或 Critic，但仍受总预算和单工具次数限制。Supervisor 不能绕过 Specialist 直接调用底层搜索或 Diff。最终输出还会检查引用、候选 ID 和置信度：因果问题如果没有通过独立 Critic，置信度最多 0.6；Critic 找不到 grounded Diff 或关键反证时只能给 PARTIAL。工具预算耗尽会作为结构化错误返回给模型，让它选择现有证据、澄清或停止；如果整个 multi-agent 运行失败且开启了 fallback，则回到旧 workflow，不允许无限继续。
 
 ## PROJ-15｜如何做 grounding、MCP 工具化和下一代架构？
 
 **关键词：** **Citation Validity**、**6 个工具**、**Streamable HTTP**、**Shared Core**、**Agentic Verification**  
-**关联：** MCP-01、MCP-03、PROJ-05
+**关联：** MCP-01、MCP-03、PROJ-05、PROJ-17
 
-**参考答案：** Grounding 这块我会先程序化抽取答案里的 SHA 和引用，再去核对冻结 Corpus、当前 Retrieval Set 和 Required Evidence，统计 **Citation Validity、幻觉引用率和 Coverage**；开放式因果解释再交给 Rubric 或人工。系统通过 **Streamable HTTP** 暴露 6 个 MCP 工具，API、UI 和 MCP 共用同一套检索核心，Host 决定什么时候调、能调什么。下一步就是让索引做跨仓库粗召回，再用 `git show/diff`、`rg` 和 Symbol Search 对 Top-N 做原始证据验证。
+**参考答案：** Grounding 先由程序抽取答案里的 SHA 和引用，再核对冻结 Corpus、Candidate Ledger 和 Required Evidence，统计 **Citation Validity、幻觉引用率和 Coverage**。Diff Investigator 已能通过共享 `commit-diff-service` 读取 ledger 内 Top-N 的 GitHub/ADO 原始 Diff；Critic 再独立检查支持证据、反证和缺口。API、UI、MCP 与 multi-agent 共用检索和 Diff 数据面，MCP 仍通过 Streamable HTTP 暴露 6 个只读工具。下一步不是再造一套检索，而是在同一 Harness 下补 `rg` 和 Symbol Search，并通过 workflow/multi-agent paired eval 证明动态调查带来的质量收益是否值得额外延迟与成本。
 
 ## PROJ-16｜新的 Issue 时间窗和本地 LTR 到底如何工作？
 
@@ -125,3 +127,116 @@ Prompt 工程上，我把动态业务内容和 System Prompt 隔离，为 4 类 
 **参考答案：** 这条链路只用于输入本身带 `createdAt/closedAt` 的 Issue。时间窗不是看 gold commit 倒推，而是只在 dev 上比较多个固定窗口，最后选择最小的达标配置：`createdAt - 7 天` 到 `closedAt + 30 天`，它在 dev 上覆盖 98.78% relevant commits。检索时先用 repo 和 commit 日期做 SQL pre-filter，再在窗内分别跑 raw/compact × Dense/Lexical Top 100，合并去重后平均约 153 个候选。
 
 本地 LTR 不生成答案，也不调用 LLM。它读取 35 个可解释 feature，包括四个通道是否命中、排名和相对分、多路共识、word/char TF-IDF，以及 query 对 title、summary、changed files、affected areas 的 overlap。327 dev 内再按 shared fix commit 分成 229 train / 98 validation，比较 Logistic、HistGradientBoosting 和 ExtraTrees，选出 `hist-depth3` 后在全部 dev 重训，最后评估 134 test。结果是 candidate availability 97.76%，Recall@10/20 为 92.54%/94.78%。开放 Issue 没有 `closedAt`，只能暂用 now，并且必须单独评测；普通 text-only 查询也不能引用这组指标。
+
+## PROJ-17｜Commit AI Resolver 暴露了哪 6 个 MCP 工具？它们怎样提供给 IDE Agent？
+
+**关键词：** **1 个 Server / 6 个 Tools**、**Zod Schema**、**Streamable HTTP**、**Session**、**Shared Core**、**Local-only**
+**关联：** MCP-02、MCP-04、PROJ-05、PROJ-15
+
+**参考答案：** 准确说，项目不是启动了 6 个 MCP Server，而是一个名为 `commit-ai-resolver` 的 Server 注册了 6 个 Tool：`search_commits` 做 Dense + FTS5 混合检索，`get_commit` 按短 SHA 精确查询，`get_daily_summary` 取单日汇总，`list_available_dates` 列出有数据的日期，`list_commits_by_filter` 按仓库、日期和变更类型枚举 Commit，`get_commit_diff` 获取并过滤真实文件 Diff；此外还有一个 `commit://stats` Resource 返回索引统计。每个 Tool 都用 Zod 声明输入 Schema，结果统一转换成 MCP `content`，错误显式标记 `isError`。
+
+传输层用 Express 的 `/mcp` 端点接 `NodeStreamableHTTPServerTransport`。客户端先发 `initialize`，服务端生成 `Mcp-Session-Id`，并为每个 Session 建立一组 `McpServer + Transport`；之后客户端通过 `tools/list` 发现能力，再用 `tools/call` 调用，GET 和 DELETE 也交给同一 Transport 处理流与会话关闭。Tool Handler 通过依赖注入复用 API 的 Embedding、Vector/FTS 检索、Daily JSON、ADO Diff 和过滤逻辑，并把来源记为 `mcp`，所以不是另写一套业务实现。安装脚本只负责把 `http://127.0.0.1:4399/mcp` 写进 Copilot CLI、Claude 和 VS Code 配置。当前端点无应用级鉴权且 Session 在单进程内存中，因此定位是本机 IDE 集成；若要远程或多实例部署，必须补认证授权、租户隔离和共享或无状态 Session 设计。
+
+## PROJ-18｜为什么 RCA Retrieval 改完以后必须重做 Evidence Gate？
+
+**关键词：** **Distribution Shift**、**Filter Provenance**、**Selective Prediction**、**Hard Negative**、**Causal Evidence**
+**关联：** EVAL-02、EVAL-04、RAG-12、PROJ-09、PROJ-10、PROJ-16
+
+**参考答案：** 因为 Retriever 和 Gate 是同一决策系统的上下游，Retriever 一变，Gate 看到的特征分布就变了。旧链路是多路 Dense/Lexical + RRF，Gate 主要看最高 Dense 分、Top-10 通道重叠、结果数和显式 filter；新 RCA 链路先做 Issue 时间窗，再汇总 raw/compact × Dense/Lexical 四路候选，最后由本地 LTR 排序。如果仍用旧 Dense 阈值，会忽略新候选池的共识、LTR margin 和时间窗来源，出现错误放行或过度拒答。
+
+我的改法是把 Gate 拆成三层。第一层在检索前判断 Issue 信息是否足够，缺 repo、时间或关键症状时 ASK_USER；第二层在 LTR 后判断“是否有值得精查的候选”，使用四路共识、rank、相对分、top-1/top-2 margin、窗口宽度和来源，但不把加权训练得到的 LTR score 当天然概率；第三层在读取 `git show/diff`、`rg` 或 symbol 证据后判断“是否足以给出因果结论”，没有原始证据时最多返回候选或 PARTIAL，不能直接生成确定 RCA。标定集必须同时有真实正例、同窗同模块 hard negative、Issue/Commit 错配、OOD、歧义、candidate miss 和 ranking miss；指标同时看 SEARCH recall、ABSTAIN recall、false SEARCH rate、ASK accuracy、coverage 与 selective accuracy。这样 Gate 优化的目标不是单纯提高通过率，而是在可接受覆盖率下控制错误回答成本。
+
+## PROJ-19｜为什么现在可以称为真正的 Multi-Agent，而不是把 Workflow 换了名字？
+
+**关键词：** **模型决定下一步**、**Agents-as-tools**、**差异化轨迹**、**确定性边界**
+**关联：** AGENT-01、AGENT-03、AGENT-11、PROJ-03、PROJ-14
+
+**参考答案：** 判断标准是“下一步由谁决定”。现在 Incident Commander 看到的是 `delegate_commit_retrieval`、`delegate_diff_investigation` 和 `delegate_evidence_critique` 三个 Specialist 工具，它会根据用户问题、工具 Observation 和剩余预算决定下一次调用，而不是由 JavaScript 固定顺序调用三个函数。普通变更列表可以检索后直接回答；RCA 可以继续查 Diff、找反证并交给 Critic；证据不足也可以澄清或停止。每个 Specialist 都是独立 SDK Agent，有自己的 prompt、tool allowlist 和结构化输出，所以职责与权限是真隔离。与此同时，Harness 仍用 ledger、预算、超时和校验限制可行动空间。模型拥有路径决策权，不拥有安全边界，这就是我对受控 multi-agent 的定义。
+
+### 当前 Multi-Agent 执行流程
+
+```mermaid
+flowchart TD
+    U["用户请求 /api/chat"] --> MODE{"运行模式"}
+
+    MODE -- "workflow（当前默认）" --> LEGACY["原有 Workflow<br/>Intent → RAG → Synthesis → Evaluation"]
+    MODE -- "multi_agent" --> CTX["Agent Harness 创建请求上下文"]
+    MODE -- "auto：普通查询" --> LEGACY
+    MODE -- "auto：RCA / 故障查询" --> CTX
+
+    subgraph HARNESS["Agent Harness：包围整个 Agent 运行过程"]
+        CTX --> LIMITS["初始化<br/>Agent / Tool / Diff / 时间预算"]
+        LIMITS --> PERM["加载最小工具权限<br/>缓存、超时、取消信号"]
+        PERM --> TRACE["创建 Candidate Ledger<br/>Evidence Gate 状态与 Trajectory"]
+    end
+
+    TRACE --> SUP["Supervisor<br/>Incident Commander"]
+
+    SUP -->|"Commit 问题必须先调用"| RET["Retrieval Agent"]
+    RET --> STRATEGY{"选择检索策略"}
+
+    STRATEGY -- "用户提供 SHA" --> LOOKUP["lookup_commits"]
+    STRATEGY -- "语义或条件查询" --> SEARCH["search_commits<br/>向量 + 关键词 + 元数据过滤"]
+    STRATEGY -- "仓库或日期不确定" --> STATS["get_index_stats"]
+    STATS --> SEARCH
+
+    LOOKUP --> GATE{"Deterministic Evidence Gate"}
+    SEARCH --> GATE
+
+    GATE -- "ASK_USER" --> CLARIFY["Supervisor 生成澄清问题"]
+    GATE -- "ABSTAIN" --> RETRY_SEARCH{"有实质不同的<br/>检索策略吗？"}
+    RETRY_SEARCH -- "有" --> RET
+    RETRY_SEARCH -- "没有" --> REFUSE["返回证据不足<br/>并说明缺少哪些信息"]
+    GATE -- "SEARCH" --> LEDGER["候选 Commit 写入 Ledger<br/>标记为 evidence-authorized"]
+
+    LEDGER --> DECIDE{"Supervisor 判断<br/>当前证据是否足够"}
+
+    DECIDE -- "普通总结 / 作者 / 日期 / 配置查询" --> FINAL
+    DECIDE -- "RCA / 回归 / 故障<br/>且 Diff 可用" --> DIFF["Diff Investigator"]
+    DECIDE -- "需要因果判断但 Diff 不可用" --> CRITIC["Evidence Critic"]
+
+    DIFF --> SNAPSHOT["get_evidence_snapshot"]
+    SNAPSHOT --> GETDIFF["get_commit_diff<br/>仅允许 Ledger 中授权的候选"]
+    GETDIFF --> HYP["形成因果假设<br/>支持证据 + 反对证据"]
+    HYP --> CRITIC
+
+    CRITIC --> REVIEW["检查时间、症状和 Diff 支持<br/>必要时 search_counter_evidence"]
+    REVIEW --> VERDICT{"Critic Verdict"}
+
+    VERDICT -- "RETRY" --> NEXT{"Supervisor 选择下一步"}
+    NEXT -- "换查询条件" --> RET
+    NEXT -- "检查其他候选 Diff" --> DIFF
+    NEXT -- "无法继续" --> CLARIFY
+
+    VERDICT -- "PASS" --> FINAL["Supervisor 生成结构化答案"]
+    VERDICT -- "PARTIAL" --> FINAL
+
+    FINAL --> VALIDATE["Harness 最终校验<br/>Evidence Gate、Citation、置信度、建议动作"]
+    CLARIFY --> VALIDATE
+    REFUSE --> VALIDATE
+
+    VALIDATE --> OUT["JSON 响应<br/>或 SSE status / token / complete"]
+
+    CTX -. "非取消异常且允许 fallback" .-> FALLBACK["Fallback Controller"]
+    FALLBACK --> LEGACY
+```
+
+这张图需要强调四点：
+
+1. **动态的是调查路径。** Retrieval 是 Commit 问题的必经证据入口，但之后并不是固定调用三个 Specialist。普通查询可以检索后直接回答；RCA 才可能继续读取 Diff、调用 Critic，Critic 返回 RETRY 后 Supervisor 还可以换查询、检查其他候选、澄清或停止。
+2. **确定的是安全边界。** 每次 Tool 或 Agent 调用都经过 Harness。Tool Middleware 检查调用者权限，命中相同参数时直接使用缓存，否则再扣减预算、验证 Candidate Ledger 授权、执行超时控制和输出裁剪，并把动作写入 bounded trajectory。LLM 可以选择工具，但不能修改这些策略。
+3. **最终答案仍由代码把关。** `ASK_USER` 会强制转成澄清，`ABSTAIN` 会强制返回证据不足；不存在于授权 Ledger 的 Citation 会被删除；高置信 RCA 没有 Critic PASS 时，置信度最多为 0.6。Multi-Agent 发生非取消异常时可以回退到旧 Workflow，客户端取消则直接终止，避免重复执行。
+4. **流式协议与生成流式要区分。** 当前 JSON 和 SSE 接口都已接入 Multi-Agent，但 Supervisor 会先完成结构化输出和最终校验，再把文本分块发送为 SSE `token` 事件；协议兼容现有 UI，目前还不是真正的模型生成过程逐 token streaming。
+
+可以把职责记成一句话：**Supervisor 决定路线，Specialist 生产证据，Harness 掌握规则和刹车。**
+
+**易错点：** 不要把“四个 Agent 类”本身当成证明。要展示真实 trajectory，并说明不同查询会产生不同调用路径。
+
+## PROJ-20｜真实 RCA 跑出了什么结果？如何评价它的质量、成本和边界？
+
+**关键词：** **Gold Commit**、**真实 Diff**、**Critic PARTIAL**、**92.4 秒**、**无回退**
+**关联：** PROJ-13、PROJ-14、PROJ-19、EVAL-04、EVAL-08
+
+**参考答案：** 我选了 React issue #33580 对应的 gold RCA。问题描述包含 hydrateRoot、同步 recovery、条件调用 `use(thenable)`，以及后续 “Rendered more hooks” 错误。系统在 27,646 条 Commit 中检索后，Incident Commander 委派 Retrieval、Diff Investigator 和 Evidence Critic；整次运行用了 1 次 Supervisor 加 3 次 Specialist 调用、12 次工具调用和 3 个 GitHub Commit Diff，92.4 秒完成，没有回退到旧 workflow。最终命中 gold fix commit `c3555f0c`，并从 Diff 验证根因：旧逻辑把 `RootSuspendedAtTheShell` 的 incomplete recovery tree 当成成功结果提交，造成 hook list 损坏；修复把这个状态也当成 error。
+
+我认为结果的价值不只是命中 SHA。Critic 识别出 `c3555f0c` 是修复提交，不是已证实的 introducing commit；两轮反证搜索仍没找到引入提交，因此最终给 PARTIAL，置信度 0.55。这说明 grounding 和降级逻辑有效。它的缺点也很明确：92.4 秒对交互查询偏慢，3 个同源 Diff 有重复成本，而且这只是一条 live case，不能代表 461-case 全链路准确率。下一步应做 paired batch eval、同 PR/同 source change 去重、并行 Diff 和 latency/cost 优化。

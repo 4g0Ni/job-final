@@ -545,7 +545,7 @@ $$ n \approx \frac{(z_{1-\alpha/2}+z_{1-\beta})^2 \cdot 2\bar{p}(1-\bar{p})}{(\t
 
 ### 149. 你怎么持续跟进快速变化的 LLM 技术？
 **为什么问**：考察学习能力（换 AI 岗关心）。
-**参考回答**：我是通过真实项目持续学习：在 adocag-server 中实践 AST 分块、分层图 RAG、检索模式和 SSE；在 Commit AI Resolver 中把单路 dense 检索演进为混合检索与有界 Agent workflow，又把分散 Prompt 演进为不可信数据隔离、严格 Structured Output、Prompt Registry、Golden Eval、A/B、自动回滚和逐 Agent 遥测。平时结合论文和官方文档理解原理，再用测试、trace 和真实 badcase 验证方案，而不是只停留在框架调用层。
+**参考回答**：我是通过真实项目持续学习：在 adocag-server 中实践 AST 分块、分层图 RAG、检索模式和 SSE；在 Commit AI Resolver 中先把单路 dense 检索演进为混合检索与有界 workflow，再用 OpenAI Agents SDK 重构为 Incident Commander 动态委派 Retrieval、Diff Investigator 和 Evidence Critic。联调 DeepSeek 时，我根据真实错误补了 provider-aware Structured Output、本地 Zod 校验和 required tool calling 兼容；随后用公开 React gold case 跑通真实 GitHub Diff RCA。平时结合论文和官方文档理解原理，再用测试、trajectory 和 badcase 验证方案，而不是只停留在框架调用层。
 
 ### 150. 从传统数据工程转 AI，你觉得自己的独特优势是什么？
 **为什么问**：考察自我定位。
@@ -573,7 +573,7 @@ $$ n \approx \frac{(z_{1-\alpha/2}+z_{1-\beta})^2 \cdot 2\bar{p}(1-\bar{p})}{(\t
 
 ### 155. 讲一次你主动学习新技术并落地的经历。
 **为什么问**：考察主动性和成长。
-**参考回答**（STAR）：**情境**：团队需要提升大型代码库的知识发现和 Commit 根因定位效率。**任务**：我需要把 RAG、Agent 编排和工具协议真正落到可使用、可验证、可演进的系统。**行动**：我在 adocag-server 中实现 AST 分块、实体关系、Leiden 社区和分层检索；又在 Commit AI Resolver 中实现 FTS5 + sqlite-vec 混合召回、metadata pre-filter、加权 RRF、Evidence Gate、Evaluator 有界重试和 6 个 MCP 工具，对 27,646 条公开 React Commit 完成路径/语义增强与索引，并建立 75-case 工程回归 Harness 和 461 条真实 Issue/closing PR/fix commit RCA gold cases（模型预审版）。评测先暴露等权 RRF 负收益，再用 candidate availability 证明第一版 Top-100 候选池只有 85.82% 的重排上限；于是我改用 dev-selected Issue 生命周期时间窗和 35-feature 本地 LTR。可靠性方面，我还完成 System Prompt 数据隔离、严格 JSON Schema、版本 A/B、自动回滚、10-case Golden Eval 和逐 Agent 遥测，相关自动测试 185 项通过。**结果**：在 grouped 134-case held-out test 上，Recall@20 从 70.90% 提高到 94.78%，Recall@10 为 92.54%，且无需 LLM reranker；同时保留逐 case trace 和非 release-gate 边界。当前仍明确：461 条完成人工复核后才进入 release gate，开放 Issue、真实模型全链路 reference baseline 与大规模 ANN benchmark 仍是下一步。
+**参考回答**（STAR）：**情境**：团队需要提升大型代码库的知识发现和 Commit 根因定位效率。**任务**：我需要把 RAG、Agent 编排和工具协议真正落到可使用、可验证、可演进的系统。**行动**：我在 Commit AI Resolver 中为 27,646 条公开 React Commit 构建 FTS5 + sqlite-vec 混合召回、metadata pre-filter、加权 RRF、Evidence Gate 和 6 个 MCP 工具，再用 Issue 生命周期时间窗和 35-feature 本地 LTR解决候选上限。控制面先有固定 workflow baseline，随后用 OpenAI Agents SDK 重构为 Incident Commander、Retrieval、Diff Investigator 和 Evidence Critic；自建 Harness 负责 Candidate Ledger、工具白名单、多维预算、超时、去重、校验和 fallback。真实 provider 联调还推动我补了 DeepSeek Structured Output 兼容和 GitHub REST Diff。**结果**：在 grouped 134-case held-out test 上，Recall@20 从 70.90% 提高到 94.78%；一条真实 gold RCA 中，系统命中目标修复 Commit，Critic 因 introducing commit 证据缺失主动给出 PARTIAL，且没有回退到旧 workflow。当前仍明确：461 条完成人工复核后才进入 release gate，单次 live case 不能替代批量全链路 Eval；下一步是 paired evaluation 和延迟成本优化。
 
 ### 156. 你和同事在技术方案上有分歧时怎么处理？
 **为什么问**：协作能力。

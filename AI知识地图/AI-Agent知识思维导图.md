@@ -134,6 +134,16 @@ mindmap
         Direct+FTS5+Dense+RRF
         Evidence Gate
         6个MCP工具
+      Multi-Agent控制面
+        Incident Commander
+        Retrieval Agent
+        Diff Investigator
+        Evidence Critic
+      Agent Harness
+        Candidate Ledger
+        工具白名单与多维预算
+        超时去重校验与回退
+        JSON和SSE bounded trace
       两层数据集
         75-case工程回归
         23-case frozen test
@@ -148,12 +158,18 @@ mindmap
         四路Top100候选池
         本地LTR 35个features
         test Recall@20 94.78%
-      下一代
+      真实RCA证据
+        命中gold fix c3555f0c
+        12次工具调用与3个Diff
+        Critic降级为PARTIAL
+        92.4秒且无workflow回退
+      下一步
         461条人工rubric
         开放Issue单独评测
-        索引粗召回
-        rg/git/symbol原始证据精查
-      题号 PROJ-01~16
+        workflow与multi-agent成对Eval
+        同源Diff去重与延迟成本优化
+        rg与symbol源码精查
+      题号 PROJ-01~20
 ```
 
 ## 一张图记住问题之间的因果关系
